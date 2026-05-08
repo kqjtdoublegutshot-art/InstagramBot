@@ -1,0 +1,13 @@
+.env
+activity.json
+watchdog.log
+ngrok.exe
+start.bat
+watchdog.bat
+__pycache__/
+*.py[cod]
+.Python
+.venv/
+venv/
+env/
+.claude/

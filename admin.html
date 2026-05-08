@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bot Dashboard</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 40px auto; padding: 16px; color: #333; }
+    h2 { margin-bottom: 4px; }
+    .section { margin: 28px 0; }
+    h3 { border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px; }
+    #updated { color: #888; font-size: 12px; margin-bottom: 8px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 14px 16px; margin: 8px 0; }
+    .service-card { display: flex; justify-content: space-between; align-items: center; }
+    .badge { padding: 3px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    .active { background: #d4edda; color: #155724; }
+    .inactive { background: #f8d7da; color: #721c24; }
+    .rule-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .rule-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+    .rule-detail { font-size: 13px; color: #666; margin-top: 2px; }
+    .btn { padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .btn-primary { background: #0066cc; color: #fff; }
+    .btn-primary:hover { background: #0052a3; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    .btn-danger:hover { background: #b02a37; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    .btn-secondary:hover { background: #545b62; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-row { display: flex; gap: 6px; flex-shrink: 0; }
+    .add-btn-row { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+    dialog { border: none; border-radius: 12px; padding: 24px; width: 90%; max-width: 480px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+    dialog::backdrop { background: rgba(0,0,0,0.4); }
+    dialog h3 { margin-top: 0; }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #555; }
+    .hint { font-size: 12px; color: #888; margin-top: 2px; }
+    input, textarea { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
+    textarea { resize: vertical; min-height: 80px; }
+    .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <h2>Bot Dashboard</h2>
+  <p id="updated"></p>
+
+  <div class="section">
+    <h3>서비스 상태</h3>
+    <div id="services"></div>
+  </div>
+
+  <div class="section">
+    <h3>최근 활동</h3>
+    <div id="activity"></div>
+  </div>
+
+  <div class="section">
+    <h3>룰 관리</h3>
+    <div class="add-btn-row">
+      <button class="btn btn-primary" onclick="openForm()">+ 룰 추가</button>
+    </div>
+    <div id="rules"></div>
+  </div>
+
+  <dialog id="modal">
+    <h3 id="modal-title">룰 추가</h3>
+    <div class="form-group">
+      <label>룰 이름 *</label>
+      <input id="f-name" placeholder="예: 에어컨 청소 문의">
+    </div>
+    <div class="form-group">
+      <label>media_id</label>
+      <input id="f-media-id" placeholder="특정 게시물만 적용 (없으면 비워두기)">
+      <p class="hint">주의!! 인스타 게시물 ID — 비워두면 모든 게시물에 적용</p>
+    </div>
+    <div class="form-group">
+      <label>키워드 *</label>
+      <input id="f-keywords" placeholder="예: 에어컨청소, 에어컨 청소">
+      <p class="hint">쉼표로 구분</p>
+    </div>
+    <div class="form-group">
+      <label>최소 키워드 개수</label>
+      <input id="f-min-keywords" type="number" value="1" min="1">
+      <p class="hint">1 = 하나만 있어도 반응</p>
+    </div>
+    <div class="form-group">
+      <label>댓글 답글 *</label>
+      <textarea id="f-comment-reply" placeholder="DM 보내드렸어요!&#10;댓글 감사해요 DM 확인해주세요!"></textarea>
+      <p class="hint">줄바꿈으로 여러 개 입력하면 랜덤 선택</p>
+    </div>
+    <div class="form-group">
+      <label>DM 내용</label>
+      <textarea id="f-dm-message" placeholder="DM으로 보낼 내용 (없으면 비워두기)"></textarea>
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input id="f-require-follow" type="checkbox" style="width:auto;margin:0">
+        팔로우 확인 후 DM 전송
+      </label>
+      <p class="hint">체크하면 팔로워인 경우에만 DM 내용을 전송해요</p>
+    </div>
+    <div class="form-group">
+      <label>링크 URL (선택)</label>
+      <input id="f-dm-url" placeholder="https://...">
+      <p class="hint">입력하면 DM에 링크 버튼이 추가돼요</p>
+    </div>
+    <div class="form-group">
+      <label>링크 버튼 텍스트 (선택)</label>
+      <input id="f-dm-url-title" placeholder="예: 쿠팡에서 보기">
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeForm()">취소</button>
+      <button class="btn btn-primary" onclick="saveRule()">저장</button>
+    </div>
+  </dialog>
+
+  <script>
+    const labels = { 'instagram-bot': 'Instagram 봇', 'telegram-bot': '텔레그램 봇' };
+    let editIndex = null;
+
+    async function loadStatus() {
+      const r = await fetch('/admin/status');
+      const data = await r.json();
+      document.getElementById('services').innerHTML = Object.entries(data).map(([k, v]) => `
+        <div class="card service-card">
+          <div>
+            <div style="font-weight:600;margin-bottom:6px">${labels[k] || k}</div>
+            <span class="badge ${v === 'active' ? 'active' : 'inactive'}">${v === 'active' ? '✅ 실행 중' : '❌ 중단'}</span>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="restart('${k}')">재시작</button>
+        </div>`).join('');
+      document.getElementById('updated').textContent = '마지막 확인: ' + new Date().toLocaleTimeString('ko-KR');
+    }
+
+    async function restart(s) {
+      if (!confirm((labels[s] || s) + '을 재시작할까요?')) return;
+      await fetch('/admin/restart/' + s, { method: 'POST' });
+      setTimeout(loadStatus, 3000);
+    }
+
+    async function loadRules() {
+      const r = await fetch('/admin/rules');
+      const { rules } = await r.json();
+      document.getElementById('rules').innerHTML = rules.length === 0
+        ? '<p style="color:#888;text-align:center;padding:20px 0">등록된 룰이 없어요.</p>'
+        : rules.map((rule, i) => {
+          const kw = (rule.keywords || []).join(', ');
+          const minKw = rule.min_keywords || 1;
+          const replies = Array.isArray(rule.comment_reply) ? rule.comment_reply.length : 1;
+          return `
+          <div class="card">
+            <div class="rule-header">
+              <div style="flex:1">
+                <div class="rule-name">${rule.name || '(이름 없음)'}</div>
+                <div class="rule-detail">📌 ${rule.media_id || '전체 게시물'}</div>
+                <div class="rule-detail">🔑 ${kw} (최소 ${minKw}개)</div>
+                <div class="rule-detail">💬 댓글 답글 ${replies}개 &nbsp;|&nbsp; 📩 DM ${rule.dm_message ? '있음' : '없음'} ${rule.require_follow ? '&nbsp;|&nbsp; 🔒 팔로우 확인' : ''}</div>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-secondary btn-sm" onclick="openEditForm(${i})">수정</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteRule(${i})">삭제</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+    }
+
+    function openForm() {
+      editIndex = null;
+      document.getElementById('modal-title').textContent = '룰 추가';
+      document.getElementById('f-name').value = '';
+      document.getElementById('f-media-id').value = '';
+      document.getElementById('f-keywords').value = '';
+      document.getElementById('f-min-keywords').value = 1;
+      document.getElementById('f-comment-reply').value = '';
+      document.getElementById('f-dm-message').value = '';
+      document.getElementById('f-require-follow').checked = false;
+      document.getElementById('f-dm-url').value = '';
+      document.getElementById('f-dm-url-title').value = '';
+      document.getElementById('modal').showModal();
+    }
+
+    async function openEditForm(i) {
+      const r = await fetch('/admin/rules');
+      const { rules } = await r.json();
+      const rule = rules[i];
+      editIndex = i;
+      document.getElementById('modal-title').textContent = '룰 수정';
+      document.getElementById('f-name').value = rule.name || '';
+      document.getElementById('f-media-id').value = rule.media_id || '';
+      document.getElementById('f-keywords').value = (rule.keywords || []).join(', ');
+      document.getElementById('f-min-keywords').value = rule.min_keywords || 1;
+      document.getElementById('f-comment-reply').value = Array.isArray(rule.comment_reply)
+        ? rule.comment_reply.join('\n') : (rule.comment_reply || '');
+      document.getElementById('f-dm-message').value = rule.dm_message || '';
+      document.getElementById('f-require-follow').checked = !!rule.require_follow;
+      document.getElementById('f-dm-url').value = rule.dm_url || '';
+      document.getElementById('f-dm-url-title').value = rule.dm_url_title || '';
+      document.getElementById('modal').showModal();
+    }
+
+    function closeForm() {
+      document.getElementById('modal').close();
+    }
+
+    async function saveRule() {
+      const name = document.getElementById('f-name').value.trim();
+      const mediaId = document.getElementById('f-media-id').value.trim();
+      const keywords = document.getElementById('f-keywords').value.split(',').map(k => k.trim()).filter(Boolean);
+      const minKw = parseInt(document.getElementById('f-min-keywords').value) || 1;
+      const replyLines = document.getElementById('f-comment-reply').value.split('\n').map(r => r.trim()).filter(Boolean);
+      const dm = document.getElementById('f-dm-message').value.trim();
+      const requireFollow = document.getElementById('f-require-follow').checked;
+      const dmUrl = document.getElementById('f-dm-url').value.trim();
+      const dmUrlTitle = document.getElementById('f-dm-url-title').value.trim();
+
+      if (!name || keywords.length === 0 || replyLines.length === 0) {
+        alert('이름, 키워드, 댓글 답글은 필수예요.');
+        return;
+      }
+
+      const rule = { name };
+      if (mediaId) rule.media_id = mediaId;
+      rule.keywords = keywords;
+      if (minKw > 1) rule.min_keywords = minKw;
+      rule.comment_reply = replyLines.length === 1 ? replyLines[0] : replyLines;
+      if (dm) rule.dm_message = dm;
+      if (requireFollow) rule.require_follow = true;
+      if (dmUrl) rule.dm_url = dmUrl;
+      if (dmUrlTitle) rule.dm_url_title = dmUrlTitle;
+
+      const url = editIndex === null ? '/admin/rules' : '/admin/rules/' + editIndex;
+      const method = editIndex === null ? 'POST' : 'PUT';
+      await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(rule) });
+
+      closeForm();
+      loadRules();
+    }
+
+    async function deleteRule(i) {
+      if (!confirm('이 룰을 삭제할까요?')) return;
+      await fetch('/admin/rules/' + i, { method: 'DELETE' });
+      loadRules();
+    }
+
+    let _activityData = [];
+    let _activityPage = 0;
+    const PAGE_SIZE = 5;
+
+    function renderActivity() {
+      const el = document.getElementById('activity');
+      const statusLabel = { matched: '', no_match: '⚪ 키워드 불일치', no_rule: '⚪ 룰 없음' };
+      const dmLabel = { ok: '✅ DM', fail: '❌ DM 실패', pending: '🔒 팔로우 대기' };
+      const replyLabel = { ok: '✅ 댓글', fail: '❌ 댓글 실패' };
+      const total = _activityData.length;
+      const totalPages = Math.ceil(total / PAGE_SIZE);
+      const page = _activityData.slice(_activityPage * PAGE_SIZE, (_activityPage + 1) * PAGE_SIZE);
+      const cards = page.map(a => `
+        <div class="card" style="padding:10px 14px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <span style="font-weight:600">@${a.username}</span>
+              <span style="color:#888;font-size:12px;margin-left:8px">${a.time}</span>
+              <div style="font-size:13px;color:#555;margin-top:3px">${a.comment}</div>
+              ${a.rule ? `<div style="font-size:12px;color:#0066cc;margin-top:2px">룰: ${a.rule}</div>` : ''}
+            </div>
+            <div style="text-align:right;font-size:12px;white-space:nowrap;margin-left:12px">
+              ${a.comment_reply ? replyLabel[a.comment_reply] || '' : ''}
+              ${a.dm ? '<br>' + (dmLabel[a.dm] || '') : ''}
+              ${a.status !== 'matched' ? statusLabel[a.status] || '' : ''}
+            </div>
+          </div>
+        </div>`).join('');
+      const pagination = totalPages > 1 ? `
+        <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:8px">
+          <button class="btn btn-secondary btn-sm" onclick="activityPage(-1)" ${_activityPage === 0 ? 'disabled' : ''}>◀</button>
+          <span style="font-size:13px;color:#666">${_activityPage + 1} / ${totalPages}</span>
+          <button class="btn btn-secondary btn-sm" onclick="activityPage(1)" ${_activityPage >= totalPages - 1 ? 'disabled' : ''}>▶</button>
+        </div>` : '';
+      el.innerHTML = cards + pagination;
+    }
+
+    function activityPage(dir) {
+      const totalPages = Math.ceil(_activityData.length / PAGE_SIZE);
+      _activityPage = Math.max(0, Math.min(_activityPage + dir, totalPages - 1));
+      renderActivity();
+    }
+
+    async function loadActivity() {
+      const r = await fetch('/admin/activity');
+      const { activity } = await r.json();
+      const el = document.getElementById('activity');
+      if (activity.length === 0) {
+        el.innerHTML = '<p style="color:#888;text-align:center;padding:20px 0">아직 활동이 없어요.</p>';
+        return;
+      }
+      _activityData = activity;
+      renderActivity();
+    }
+
+    loadStatus();
+    loadRules();
+    loadActivity();
+    setInterval(loadStatus, 30000);
+    setInterval(loadActivity, 30000);
+  </script>
+</body>
+</html>
