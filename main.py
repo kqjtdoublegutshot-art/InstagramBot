@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.staticfiles import StaticFiles
 
 from instagram_api import InstagramAPI
 from rules import find_matching_rule, has_rule_for_media, load_rules, pick_message, save_rules
@@ -26,6 +27,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 log = logging.getLogger(__name__)
 
 app = FastAPI(title="Instagram Auto-Response Bot")
+app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 
 VERIFY_TOKEN = os.environ["VERIFY_TOKEN"]
 _processed: set[str] = set()
@@ -60,6 +62,7 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
 _security = HTTPBasic()
 
 _ADMIN_HTML_FILE = Path(__file__).parent / "admin.html"
+_PUBLIC_HTML_FILE = Path(__file__).parent / "public.html"
 
 
 def _check_admin(credentials: HTTPBasicCredentials = Depends(_security)):
@@ -88,12 +91,40 @@ def _valid_signature(payload: bytes, signature: str) -> bool:
 
 
 @app.get("/", response_class=HTMLResponse)
+async def public_home():
+    return _PUBLIC_HTML_FILE.read_text(encoding="utf-8")
+
+
+@app.get("/start", response_class=HTMLResponse)
 async def root():
+    return _PUBLIC_HTML_FILE.read_text(encoding="utf-8")
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_page():
+    return _PUBLIC_HTML_FILE.read_text(encoding="utf-8")
+
+
+@app.get("/terms", response_class=HTMLResponse)
+async def terms_page():
+    return _PUBLIC_HTML_FILE.read_text(encoding="utf-8")
+
+
+@app.get("/disabled-policy-page", response_class=HTMLResponse)
+async def data_deletion_page():
+    return _PUBLIC_HTML_FILE.read_text(encoding="utf-8")
+
     return """<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Bot</title>
 <style>body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
 a{padding:12px 24px;background:#0066cc;color:#fff;text-decoration:none;border-radius:8px;font-size:16px}</style>
 </head><body><a href="/admin">관리자 대시보드</a></body></html>"""
+
+
+@app.get("/miniapps/3min-stretch", response_class=HTMLResponse)
+@app.get("/miniapps/3min-stretch/", response_class=HTMLResponse)
+async def three_min_stretch_page():
+    return _PUBLIC_HTML_FILE.read_text(encoding="utf-8")
 
 
 @app.get("/health")

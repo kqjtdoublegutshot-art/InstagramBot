@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>몽글스튜디오</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #dfe5ee;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --ink: #101828;
+      --soft: #eef4ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    a { color: inherit; }
+
+    .site-header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand {
+      text-decoration: none;
+      font-weight: 850;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: #475467;
+      font-size: 14px;
+      font-weight: 750;
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+
+    .nav a:hover,
+    .nav a.active {
+      color: var(--accent);
+      background: var(--soft);
+    }
+
+    .nav .login-link {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .nav .login-link:hover {
+      background: var(--accent-dark);
+      color: #ffffff;
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 34px 20px 56px;
+    }
+
+    .hero {
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 42px;
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 24px;
+      margin-top: 18px;
+    }
+
+    .section h2 {
+      margin: 0 0 10px;
+      color: var(--ink);
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .section h3 {
+      color: var(--ink);
+      margin: 24px 0 8px;
+      font-size: 18px;
+    }
+
+    .section p,
+    .section li {
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .section ul,
+    .section ol {
+      margin: 12px 0 0;
+      padding-left: 20px;
+    }
+
+    .policy-meta {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .card {
+      display: block;
+      border: 1px solid #e7edf6;
+      border-radius: 8px;
+      padding: 16px;
+      background: #fafbfd;
+      text-decoration: none;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: var(--ink);
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .card:hover {
+      border-color: #b7cdfb;
+      background: #f5f8ff;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 850;
+      margin-bottom: 10px;
+    }
+
+    .miniapp-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .miniapp-title-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .miniapp-icon {
+      width: 76px;
+      height: 76px;
+      border-radius: 18px;
+      border: 1px solid #e1e8f3;
+      object-fit: cover;
+      box-shadow: 0 10px 28px rgba(23, 32, 51, 0.12);
+      flex: 0 0 auto;
+    }
+
+    .app-summary {
+      border: 1px solid #e7edf6;
+      border-radius: 8px;
+      padding: 16px;
+      background: #fafbfd;
+    }
+
+    .app-summary strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    footer {
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      padding: 22px 20px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    @media (max-width: 820px) {
+      .header-inner {
+        align-items: flex-start;
+        display: grid;
+      }
+
+      .nav {
+        justify-content: flex-start;
+      }
+
+      .cards,
+      .miniapp-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .hero h1 {
+        font-size: 34px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="/">몽글스튜디오</a>
+      <nav class="nav" aria-label="공개 페이지">
+        <a href="/" data-route="/">홈</a>
+        <a href="/miniapps/3min-stretch" data-route="/miniapps/3min-stretch">서비스</a>
+        <a href="/privacy" data-route="/privacy">개인정보처리방침</a>
+        <a href="/terms" data-route="/terms">이용약관</a>
+        <a class="login-link" href="/admin">관리자 로그인</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page" data-page="/">
+      <div class="hero">
+        <h1>몽글스튜디오</h1>
+      </div>
+
+      <section class="section">
+        <h2>서비스</h2>
+        <p>몽글스튜디오가 운영하는 서비스입니다. 서비스별 개인정보처리방침과 이용약관은 각 서비스 상세 페이지에서 확인할 수 있습니다.</p>
+        <h3>미니앱</h3>
+        <div class="cards">
+          <a class="card" href="/miniapps/3min-stretch">
+            <span class="badge">토스 미니앱</span>
+            <h3>3분 스트레칭</h3>
+            <p>매일 짧게 따라 하는 스트레칭 루틴과 완료 기록, 배지, 포인트를 제공하는 미니앱입니다.</p>
+          </a>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>공개 정책</h2>
+        <p>몽글스튜디오의 공통 정책 페이지입니다. 아래 페이지는 로그인 없이 확인할 수 있습니다.</p>
+        <div class="cards">
+          <a class="card" href="/privacy">
+            <h3>개인정보처리방침</h3>
+            <p>몽글스튜디오 공통 개인정보 처리 기준을 안내합니다.</p>
+          </a>
+          <a class="card" href="/terms">
+            <h3>이용약관</h3>
+            <p>몽글스튜디오 공통 서비스 이용 조건을 안내합니다.</p>
+          </a>
+        </div>
+      </section>
+    </section>
+
+    <section class="page section" data-page="/miniapps/3min-stretch">
+      <div class="miniapp-hero">
+        <div>
+          <span class="badge">미니앱</span>
+          <div class="miniapp-title-row">
+            <img class="miniapp-icon" src="/static/miniapps/3min-stretch/logo.png" alt="3분 스트레칭 앱 아이콘">
+            <h2>3분 스트레칭</h2>
+          </div>
+          <p>
+            3분 스트레칭은 토스 미니앱 환경에서 제공되는 생활 습관 보조 서비스입니다.
+            이용자는 짧은 스트레칭 루틴을 따라 하고, 완료 기록, 연속 달성일, 배지, 포인트 등을 확인할 수 있습니다.
+          </p>
+        </div>
+        <aside class="app-summary">
+          <strong>서비스 정보</strong>
+          <p>운영자: 몽글스튜디오</p>
+          <p>플랫폼: 토스 미니앱</p>
+          <p>문의: arthur@monglestudio.co.kr</p>
+        </aside>
+      </div>
+
+      <h3>3분 스트레칭 개인정보처리방침</h3>
+      <div class="policy-meta">시행일: 2026년 5월 8일</div>
+      <p>
+        본 방침은 3분 스트레칭 서비스에서 처리하는 개인정보와 이용 기록에 관한 내용을 안내합니다.
+        몽글스튜디오 공통 개인정보처리방침과 함께 적용되며, 본 서비스에 관해서는 아래 내용이 우선 적용됩니다.
+      </p>
+      <h3>처리 목적</h3>
+      <ul>
+        <li>스트레칭 루틴 제공, 타이머 실행, 완료 기록 표시</li>
+        <li>닉네임, 연속 달성일, 누적 완료일, 배지, 포인트, 칭호 등 이용자별 화면 구성</li>
+        <li>광고 표시, 광고 클릭 기록 반영, 서비스 이용 편의 제공</li>
+        <li>오류 확인, 서비스 개선, 부정 이용 방지</li>
+      </ul>
+      <h3>처리 항목</h3>
+      <ul>
+        <li>이용자가 입력하는 정보: 닉네임</li>
+        <li>서비스 이용 기록: 스트레칭 완료일, 완료 시간대, 연속 달성일, 누적 완료일, 반복 세션 수</li>
+        <li>서비스 표시 정보: 배지, 포인트, 선택한 칭호, 광고 클릭 횟수</li>
+        <li>기술 정보: 앱 또는 브라우저 환경, 오류 확인에 필요한 정보</li>
+      </ul>
+      <h3>저장 방식과 보관</h3>
+      <p>
+        3분 스트레칭의 주요 이용 기록은 이용자의 기기 또는 브라우저 저장소에 저장될 수 있습니다.
+        앱 데이터, 브라우저 저장소, 캐시 삭제 또는 기기 변경 시 기록이 사라지거나 복구되지 않을 수 있습니다.
+      </p>
+      <h3>민감정보</h3>
+      <p>
+        3분 스트레칭은 건강 상태, 질병 정보, 진료 정보 등 민감한 의료 정보를 입력받는 것을 목적으로 하지 않습니다.
+        이용자는 닉네임 또는 문의 내용에 민감정보를 입력하지 않아야 합니다.
+      </p>
+      <h3>변경 가능성</h3>
+      <p>
+        향후 랭킹, 알림, 광고, 서버 저장 기능 등이 추가되는 경우 처리 항목과 방식이 변경될 수 있으며,
+        필요한 경우 본 페이지 또는 서비스 화면을 통해 안내합니다.
+      </p>
+
+      <h3>3분 스트레칭 이용약관</h3>
+      <div class="policy-meta">시행일: 2026년 5월 8일</div>
+      <p>
+        본 약관은 3분 스트레칭 서비스 이용에 추가로 적용됩니다.
+        몽글스튜디오 공통 이용약관과 함께 적용되며, 본 서비스에 관해서는 아래 내용이 우선 적용됩니다.
+      </p>
+      <h3>서비스 내용</h3>
+      <ul>
+        <li>3분 스트레칭은 이용자가 매일 짧은 시간 동안 따라 할 수 있는 스트레칭 동작, 타이머, 완료 기록 기능을 제공합니다.</li>
+        <li>닉네임, 연속 달성일, 누적 완료일, 배지, 포인트, 칭호, 광고 클릭 횟수 등 이용 기록을 표시할 수 있습니다.</li>
+        <li>포인트, 배지, 랭킹 등은 이용 경험을 위한 기능이며 현금, 재산상 이익 또는 외부 보상으로 교환되지 않습니다.</li>
+      </ul>
+      <h3>건강 관련 유의사항</h3>
+      <ul>
+        <li>스트레칭 안내는 일반적인 생활 습관 보조 목적의 정보이며, 의학적 진단, 치료, 처방 또는 전문적인 운동 지도를 대체하지 않습니다.</li>
+        <li>이용자는 자신의 건강 상태, 통증, 질환, 부상 여부를 고려하여 무리하지 않는 범위에서 서비스를 이용해야 합니다.</li>
+        <li>스트레칭 중 통증, 어지러움, 호흡 곤란, 저림 등 이상 증상이 발생하면 즉시 이용을 중단하고 필요한 경우 의사 등 전문가와 상담해야 합니다.</li>
+        <li>임산부, 고령자, 질환자, 수술 또는 부상 회복 중인 이용자는 서비스 이용 전 전문가와 상담하는 것을 권장합니다.</li>
+      </ul>
+      <h3>기록과 광고</h3>
+      <ul>
+        <li>앱 데이터, 브라우저 저장소, 캐시 삭제 또는 기기 변경 시 기록이 복구되지 않을 수 있습니다.</li>
+        <li>광고 시청 또는 클릭에 따라 일부 서비스 내 기능, 배지 조건, 포인트 기록 등이 반영될 수 있습니다.</li>
+        <li>서비스의 일부 기능은 토스 앱 또는 토스 미니앱 환경에서 제공되는 기능 및 정책에 따라 달라질 수 있습니다.</li>
+      </ul>
+    </section>
+
+    <section class="page section" data-page="/privacy">
+      <h2>몽글스튜디오 개인정보처리방침</h2>
+      <div class="policy-meta">시행일: 2026년 5월 8일</div>
+      <p>
+        몽글스튜디오는 이용자의 개인정보를 중요하게 생각하며, 관련 법령에 따라 개인정보를 안전하게 처리하기 위해 노력합니다.
+        본 개인정보처리방침은 몽글스튜디오가 제공하는 웹사이트, 미니앱, 자동화 도구, 콘텐츠 및 기타 디지털 서비스에 공통으로 적용됩니다.
+      </p>
+      <h3>처리 목적</h3>
+      <ul>
+        <li>서비스 제공, 화면 표시, 기능 동작 및 이용자 설정 저장</li>
+        <li>고객 문의 응대, 오류 확인, 서비스 안정성 개선</li>
+        <li>부정 이용 방지, 약관 위반 행위 대응, 서비스 보안 유지</li>
+        <li>광고 노출, 광고 관련 기능 제공 및 서비스 운영 지표 확인</li>
+      </ul>
+      <h3>처리 항목</h3>
+      <ul>
+        <li>이용자가 직접 입력하는 정보: 닉네임, 문의 내용, 이메일 주소 등</li>
+        <li>서비스 이용 과정에서 생성되는 정보: 이용 기록, 완료 기록, 설정값, 광고 클릭 기록 등</li>
+        <li>기술 정보: 접속 일시, 이용 환경, 브라우저 또는 앱 환경, 오류 로그 등</li>
+      </ul>
+      <h3>서비스별 안내</h3>
+      <p>
+        각 서비스에서 처리하는 구체적인 항목과 저장 방식은 서비스 상세 페이지에서 별도로 안내할 수 있습니다.
+        3분 스트레칭의 개인정보 처리 내용은 <a href="/miniapps/3min-stretch">3분 스트레칭 서비스 페이지</a>에서 확인할 수 있습니다.
+      </p>
+      <h3>보관 및 삭제</h3>
+      <p>
+        몽글스튜디오는 개인정보 처리 목적이 달성되면 해당 정보를 지체 없이 파기합니다.
+        다만 관계 법령에 따라 보관이 필요한 경우 해당 법령에서 정한 기간 동안 보관할 수 있습니다.
+      </p>
+      <h3>제3자 제공 및 위탁</h3>
+      <p>
+        몽글스튜디오는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다.
+        서비스 제공을 위해 외부 플랫폼, 호스팅, 분석, 광고, 알림 서비스를 이용하는 경우 관련 법령에 따라 필요한 보호 조치를 취합니다.
+      </p>
+      <h3>이용자의 권리</h3>
+      <p>
+        이용자는 본인의 개인정보에 대해 열람, 정정, 삭제, 처리정지 등을 요청할 수 있습니다.
+        요청은 arthur@monglestudio.co.kr 로 접수할 수 있습니다.
+      </p>
+      <h3>방침 변경</h3>
+      <p>
+        본 개인정보처리방침은 서비스 변경, 법령 개정, 운영 정책 변경에 따라 수정될 수 있습니다.
+        변경된 내용은 공개 페이지에 게시한 때부터 적용됩니다.
+      </p>
+    </section>
+
+    <section class="page section" data-page="/terms">
+      <h2>몽글스튜디오 이용약관</h2>
+      <div class="policy-meta">시행일: 2026년 5월 8일</div>
+      <p>
+        본 약관은 몽글스튜디오가 제공하는 웹사이트, 미니앱, 자동화 도구, 콘텐츠 및 기타 디지털 서비스의 이용 조건과
+        몽글스튜디오 및 이용자 사이의 권리, 의무 및 책임사항을 정합니다.
+      </p>
+      <h3>약관의 적용 범위</h3>
+      <ul>
+        <li>본 약관은 몽글스튜디오가 직접 운영하거나 제공하는 모든 서비스에 공통으로 적용됩니다.</li>
+        <li>개별 서비스에 별도의 이용약관, 운영정책, 안내사항 또는 서비스별 특약이 있는 경우 해당 내용이 함께 적용됩니다.</li>
+        <li>공통 약관과 서비스별 특약이 충돌하는 경우, 해당 서비스 이용에 관해서는 서비스별 특약이 우선 적용됩니다.</li>
+      </ul>
+      <h3>서비스의 내용</h3>
+      <p>
+        몽글스튜디오는 브랜드 운영, 콘텐츠 제공, 고객 응대 자동화, 생산성 도구, 건강 및 생활 습관 보조 콘텐츠 등 다양한 디지털 서비스를 제공할 수 있습니다.
+        서비스의 구체적인 기능과 이용 가능 환경은 각 서비스 화면 또는 별도 안내에 따릅니다.
+      </p>
+      <h3>이용자의 의무</h3>
+      <ul>
+        <li>이용자는 관계 법령, 본 약관, 플랫폼 정책, 서비스 내 안내사항을 준수해야 합니다.</li>
+        <li>타인의 권리를 침해하거나 서비스 운영을 방해하는 방식으로 서비스를 이용해서는 안 됩니다.</li>
+        <li>서비스의 취약점을 악용하거나 비정상적인 방법으로 기록, 포인트, 배지 등을 조작해서는 안 됩니다.</li>
+      </ul>
+      <h3>포인트, 배지, 랭킹 등</h3>
+      <p>
+        서비스에서 제공되는 포인트, 배지, 랭킹, 완료 기록, 활동 기록 등은 이용 경험을 위한 기능입니다.
+        별도 명시가 없는 한 현금, 재산상 이익, 외부 보상으로 교환되지 않습니다.
+      </p>
+      <h3>서비스별 약관</h3>
+      <p>
+        3분 스트레칭의 서비스별 이용약관은 <a href="/miniapps/3min-stretch">3분 스트레칭 서비스 페이지</a>에서 확인할 수 있습니다.
+      </p>
+      <h3>책임의 제한</h3>
+      <p>
+        몽글스튜디오는 서비스 이용과 관련하여 몽글스튜디오의 고의 또는 중대한 과실이 없는 한 이용자에게 발생한 손해에 대해 책임을 지지 않습니다.
+        토스 앱, 네트워크, 단말기, 운영체제, 플랫폼, 제3자 서비스 장애 등 합리적 통제 범위를 벗어난 사유로 발생한 손해에 대해서도 책임을 지지 않습니다.
+      </p>
+      <h3>문의</h3>
+      <p>서비스 이용 또는 약관에 관한 문의는 arthur@monglestudio.co.kr 로 연락해 주세요.</p>
+    </section>
+
+  </main>
+
+  <footer>
+    몽글스튜디오 · 문의: arthur@monglestudio.co.kr
+  </footer>
+
+  <script>
+    const path = window.location.pathname === '/start' ? '/' : window.location.pathname;
+    const pages = document.querySelectorAll('[data-page]');
+    const navLinks = document.querySelectorAll('[data-route]');
+    const knownPaths = ['/', '/miniapps/3min-stretch', '/privacy', '/terms'];
+    const activePath = knownPaths.includes(path) ? path : '/';
+
+    pages.forEach((page) => {
+      page.classList.toggle('active', page.dataset.page === activePath);
+    });
+
+    navLinks.forEach((link) => {
+      link.classList.toggle('active', link.dataset.route === activePath);
+    });
+  </script>
+</body>
+</html>

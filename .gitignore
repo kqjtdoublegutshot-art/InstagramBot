@@ -1,6 +1,7 @@
 .env
 activity.json
 watchdog.log
+uvicorn.*.log
 ngrok.exe
 start.bat
 watchdog.bat
