@@ -53,7 +53,10 @@ def _log_activity(**kwargs):
     except Exception as e:
         log.error("activity.json 저장 실패: %s", e)
 APP_SECRET = os.environ["APP_SECRET"]
-api = InstagramAPI(os.environ["INSTAGRAM_ACCESS_TOKEN"])
+api = InstagramAPI(
+    os.environ["INSTAGRAM_ACCESS_TOKEN"],
+    os.getenv("INSTAGRAM_USER_ID") or os.getenv("IG_USER_ID"),
+)
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
 TELEGRAM_USER_IDS = [uid.strip() for uid in os.getenv("TELEGRAM_USER_IDS", "").split(",") if uid.strip()]
@@ -118,7 +121,7 @@ async def data_deletion_page():
 <html><head><meta charset="utf-8"><title>Bot</title>
 <style>body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
 a{padding:12px 24px;background:#0066cc;color:#fff;text-decoration:none;border-radius:8px;font-size:16px}</style>
-</head><body><a href="/admin">관리자 대시보드</a></body></html>"""
+</head><body><a href="/console">관리자 대시보드</a></body></html>"""
 
 
 @app.get("/miniapps/3min-stretch", response_class=HTMLResponse)
@@ -132,12 +135,12 @@ async def health():
     return {"status": "ok"}
 
 
-@app.get("/admin", response_class=HTMLResponse)
+@app.get("/console", response_class=HTMLResponse)
 async def admin_page(_: HTTPBasicCredentials = Depends(_check_admin)):
     return _ADMIN_HTML_FILE.read_text(encoding="utf-8")
 
 
-@app.get("/admin/status")
+@app.get("/console/status")
 async def admin_status(_: HTTPBasicCredentials = Depends(_check_admin)):
     result = {}
     for service in ("instagram-bot", "telegram-bot"):
@@ -146,7 +149,7 @@ async def admin_status(_: HTTPBasicCredentials = Depends(_check_admin)):
     return result
 
 
-@app.post("/admin/restart/{service}")
+@app.post("/console/restart/{service}")
 async def admin_restart(service: str, _: HTTPBasicCredentials = Depends(_check_admin)):
     if service not in ("instagram-bot", "telegram-bot"):
         raise HTTPException(status_code=400, detail="Unknown service")
@@ -154,12 +157,12 @@ async def admin_restart(service: str, _: HTTPBasicCredentials = Depends(_check_a
     return {"status": "restarting"}
 
 
-@app.get("/admin/rules")
+@app.get("/console/rules")
 async def get_rules(_: HTTPBasicCredentials = Depends(_check_admin)):
     return {"rules": load_rules()}
 
 
-@app.post("/admin/rules")
+@app.post("/console/rules")
 async def add_rule(request: Request, _: HTTPBasicCredentials = Depends(_check_admin)):
     rule = await request.json()
     rules = load_rules()
@@ -168,7 +171,7 @@ async def add_rule(request: Request, _: HTTPBasicCredentials = Depends(_check_ad
     return {"status": "ok"}
 
 
-@app.put("/admin/rules/{index}")
+@app.put("/console/rules/{index}")
 async def update_rule(index: int, request: Request, _: HTTPBasicCredentials = Depends(_check_admin)):
     rule = await request.json()
     rules = load_rules()
@@ -179,7 +182,7 @@ async def update_rule(index: int, request: Request, _: HTTPBasicCredentials = De
     return {"status": "ok"}
 
 
-@app.delete("/admin/rules/{index}")
+@app.delete("/console/rules/{index}")
 async def delete_rule(index: int, _: HTTPBasicCredentials = Depends(_check_admin)):
     rules = load_rules()
     if index >= len(rules):
@@ -189,7 +192,7 @@ async def delete_rule(index: int, _: HTTPBasicCredentials = Depends(_check_admin
     return {"status": "ok"}
 
 
-@app.get("/admin/activity")
+@app.get("/console/activity")
 async def get_activity(_: HTTPBasicCredentials = Depends(_check_admin)):
     return {"activity": _activity}
 
@@ -221,7 +224,25 @@ async def handle_webhook(request: Request):
             log.error("서명 불일치 | received=%s | expected=%s", signature, expected)
             raise HTTPException(status_code=403, detail="Invalid signature")
 
-    data = json.loads(body)
+    try:
+        data = json.loads(body)
+    except json.JSONDecodeError:
+        log.warning("Invalid webhook JSON received")
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+    entries = data.get("entry", [])
+    fields = [
+        change.get("field")
+        for entry in entries
+        for change in entry.get("changes", [])
+        if isinstance(change, dict)
+    ]
+    messaging_count = sum(len(entry.get("messaging", [])) for entry in entries)
+    log.info(
+        "Webhook received: entries=%s fields=%s messaging_events=%s",
+        len(entries),
+        fields,
+        messaging_count,
+    )
     log.debug("Webhook payload: %s", data)
 
     for entry in data.get("entry", []):

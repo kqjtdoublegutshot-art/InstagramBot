@@ -762,7 +762,7 @@
       const target = document.getElementById('services');
       target.innerHTML = '<div class="empty">서비스 상태를 확인하는 중입니다.</div>';
       try {
-        state.services = await requestJson('/admin/status');
+        state.services = await requestJson('/console/status');
         target.innerHTML = Object.entries(state.services).map(([key, value]) => {
           const isActive = value === 'active';
           const type = isActive ? 'ok' : value ? 'danger' : 'warn';
@@ -790,7 +790,7 @@
 
     async function restartService(service) {
       if (!confirm(`${serviceLabels[service] || service} 서비스를 재시작할까요?`)) return;
-      await requestJson(`/admin/restart/${service}`, { method: 'POST' });
+      await requestJson(`/console/restart/${service}`, { method: 'POST' });
       setTimeout(loadStatus, 2500);
     }
 
@@ -798,7 +798,7 @@
       const target = document.getElementById('rules');
       target.innerHTML = '<div class="empty">응답 룰을 불러오는 중입니다.</div>';
       try {
-        const data = await requestJson('/admin/rules');
+        const data = await requestJson('/console/rules');
         state.rules = data.rules || [];
         renderRules();
       } catch (error) {
@@ -918,7 +918,7 @@
       if (!rule) return;
 
       const isEdit = state.editIndex !== null;
-      const url = isEdit ? `/admin/rules/${state.editIndex}` : '/admin/rules';
+      const url = isEdit ? `/console/rules/${state.editIndex}` : '/console/rules';
       const method = isEdit ? 'PUT' : 'POST';
 
       await requestJson(url, {
@@ -934,7 +934,7 @@
     async function deleteRule(index) {
       const rule = state.rules[index];
       if (!confirm(`'${rule?.name || '이름 없는 룰'}' 룰을 삭제할까요?`)) return;
-      await requestJson(`/admin/rules/${index}`, { method: 'DELETE' });
+      await requestJson(`/console/rules/${index}`, { method: 'DELETE' });
       await loadRules();
     }
 
@@ -942,7 +942,7 @@
       const target = document.getElementById('activity');
       target.innerHTML = '<div class="empty">최근 활동을 불러오는 중입니다.</div>';
       try {
-        const data = await requestJson('/admin/activity');
+        const data = await requestJson('/console/activity');
         state.activity = data.activity || [];
         state.activityPage = 0;
         renderActivity();
